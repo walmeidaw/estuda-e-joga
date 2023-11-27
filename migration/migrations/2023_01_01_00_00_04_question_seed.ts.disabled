@@ -1,0 +1,48 @@
+import { Kysely, sql } from 'kysely'
+
+export async function up(db:Kysely<any>):Promise<void>{
+    await db.insertInto('subject').values([ { name: 'Biologia' } ]).execute();
+
+    await db.insertInto('topic').values(
+        [
+            { "name": "Ecologia" },
+            { "name": "Botânica" },
+            { "name": "Botânia" },
+            { "name": "Citologia" },
+            { "name": "Evolução" },
+            { "name": "Reprodução e desenvolvimento animal" },
+            { "name": "Genética" },
+            { "name": "Programas de saúde" },
+            { "name": "Bioquímica" },
+            { "name": "Biotecnologia" },
+            { "name": "Fisiologia" },
+            { "name": "Radioatividade" },
+            { "name": "Programa de saúde" },
+            { "name": "Ácido Nucleico" },
+            { "name": "Óptica" }
+        ]
+    ).execute();
+
+    await db.insertInto('question').values({
+        text: '(Enem 2016 PPL) Em uma aula de biologia sobre formação vegetal brasileira, a professora destacou que, em uma região, a flora convive com condições ambientais curiosas. As características dessas plantas não estão relacionadas com a falta de água, mas com as condições do solo, que é pobre em sais minerais, ácido e rico em alumínio. Além disso, essas plantas possuem adaptações ao fogo.\n\nAs características adaptativas das plantas que correspondem à região destacada pela professora são:',
+        alternative_a: 'Raízes escoras e respiratórias.\nRaízes tabulares e folhas largas.\nCasca grossa e galhos retorcidos.\nRaízes aéreas e perpendiculares ao solo.\n Folhas reduzidas ou modificadas em espinhos.',
+        alternative_b: '',
+        alternative_c: '',
+        alternative_d: '',
+        alternative_e: '',
+        answer: '',
+        resolution_video: '',
+        image: '',
+        subject: 1
+    })
+}
+
+export async function down(db:Kysely<any>): Promise<void>{    
+    await db.schema.dropTable('question_topic').ifExists().execute();
+    await db.schema.dropTable('question').ifExists().execute();
+
+    await db.schema.dropType('alternative').ifExists().execute();
+    
+    await db.schema.dropTable('topic').ifExists().execute();
+    await db.schema.dropTable('subject').ifExists().execute();
+}

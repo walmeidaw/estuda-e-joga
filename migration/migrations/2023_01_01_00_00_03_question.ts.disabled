@@ -1,0 +1,56 @@
+import { Kysely, sql } from 'kysely'
+
+export async function up(db:Kysely<any>):Promise<void>{
+    await db.schema.createType('alternative').asEnum(['a','b','c','d','e']).execute()
+
+    await db.schema
+        .createTable('subject')
+        .ifNotExists()
+            .addColumn('id', 'serial', col => col.primaryKey())
+            .addColumn('name', 'varchar', col => col.notNull())
+            .addColumn('description', 'text', col => col.defaultTo(''))
+        .execute();
+
+    await db.schema
+        .createTable('topic')
+        .ifNotExists()
+            .addColumn('id', 'serial', col => col.primaryKey())
+            .addColumn('name', 'varchar')
+            .addColumn('description', 'text')
+        .execute();
+
+    await db.schema
+        .createTable('question')
+        .ifNotExists()
+            .addColumn('id','uuid', col => col.primaryKey().defaultTo(sql`gen_random_uuid()`))
+            .addColumn('text', 'text', col => col.notNull())
+            .addColumn('alternative_a', 'text', col => col.notNull())
+            .addColumn('alternative_b', 'text', col => col.notNull())
+            .addColumn('alternative_c', 'text', col => col.notNull())
+            .addColumn('alternative_d', 'text', col => col.notNull())
+            .addColumn('alternative_e', 'text', col => col.notNull())
+            .addColumn('answer', sql`alternative`, col => col.notNull())
+            .addColumn('resolution_video', 'varchar')
+            .addColumn('image', 'varchar')
+            .addColumn('subject', 'integer', col => col.references('subject.id').onDelete('set null'))
+        .execute();
+
+    await db.schema
+        .createTable('question_topic')
+        .ifNotExists()
+        .addColumn('question_id', 'uuid', col => col.references('question.id').onDelete('cascade').notNull())
+        .addColumn('topic_id', 'integer', col => col.references('topic.id').onDelete('cascade').notNull())
+    .execute();
+    
+    await db.schema.alterTable('question_topic').addUniqueConstraint('question_topic_index', ['question_id', 'topic_id']).execute();
+}
+
+export async function down(db:Kysely<any>): Promise<void>{    
+    await db.schema.dropTable('question_topic').ifExists().execute();
+    await db.schema.dropTable('question').ifExists().execute();
+
+    await db.schema.dropType('alternative').ifExists().execute();
+    
+    await db.schema.dropTable('topic').ifExists().execute();
+    await db.schema.dropTable('subject').ifExists().execute();
+}
